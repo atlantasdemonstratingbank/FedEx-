@@ -158,11 +158,62 @@
   .btn-add{background:var(--orange);color:#fff;padding:9px 18px;border-radius:50px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.86rem;border:none;cursor:pointer;transition:background 0.2s;}
   .btn-add:hover{background:var(--orange-light);}
 
+  /* DETAIL PAGE OVERLAY */
+  #detailPage{position:fixed;inset:0;z-index:800;background:var(--off-white);overflow-y:auto;display:none;flex-direction:column;animation:slideUp 0.28s cubic-bezier(.34,1.2,.64,1);}
+  #detailPage.open{display:flex;}
+  @keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:none;}}
+  .detail-hdr{background:var(--purple);padding:0 18px;height:60px;display:flex;align-items:center;gap:13px;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(0,0,0,0.18);flex-shrink:0;}
+  .back-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.2s;}
+  .back-btn:hover{background:rgba(255,255,255,0.28);}
+  .detail-hdr-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .detail-body{max-width:620px;width:100%;margin:0 auto;padding:22px 16px 80px;}
+  .detail-hero{background:linear-gradient(135deg,var(--purple),var(--purple-light));border-radius:var(--radius);padding:22px;margin-bottom:18px;color:#fff;display:flex;align-items:center;gap:16px;}
+  .detail-icon{width:54px;height:54px;background:rgba(255,255,255,0.18);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;}
+  .detail-pkg-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;margin-bottom:4px;}
+  .detail-pkg-id{font-size:0.75rem;opacity:0.72;font-family:monospace;}
+  .detail-section{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:14px;}
+  .detail-section-title{font-family:'Syne',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gray-400);margin-bottom:14px;}
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+  .detail-item label{font-size:0.66rem;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;color:var(--gray-400);display:block;margin-bottom:3px;}
+  .detail-item span{font-size:0.9rem;font-weight:600;color:var(--text);}
+  .detail-cd-box{background:linear-gradient(135deg,var(--orange),var(--orange-light));border-radius:var(--radius);padding:16px 18px;margin-bottom:14px;color:#fff;display:flex;align-items:center;gap:13px;}
+  .detail-cd-val{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;}
+  .detail-cd-lbl{font-size:0.75rem;opacity:0.85;margin-bottom:2px;}
+  @media(max-width:500px){.detail-grid{grid-template-columns:1fr;}.detail-body{padding:14px 12px 80px;}}
+
   /* TOAST */
   .toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--purple);color:#fff;padding:10px 20px;border-radius:50px;font-size:0.84rem;font-weight:600;z-index:9999;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-  @media(max-width:500px){.frow{grid-template-columns:1fr;}.det-grid{grid-template-columns:1fr;}.hero h1{font-size:1.35rem;}.modal-body{padding:16px;}.hdr-right{gap:5px;}}
+  html,body{overflow-x:hidden;max-width:100vw;}
+  .search-row{min-width:0;}
+  #searchInput{min-width:0;}
+  .pkg-title{max-width:100%;word-break:break-word;white-space:normal;}
+  .pkg-meta{flex-wrap:wrap;}
+  .card-admin{flex-wrap:wrap;}
+  .hdr-right{min-width:0;overflow:hidden;}
+  .site-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;}
+  @media(max-width:500px){
+    .frow{grid-template-columns:1fr;}
+    .det-grid{grid-template-columns:1fr;}
+    .hero h1{font-size:1.25rem;}
+    .hero p{font-size:0.82rem;}
+    .modal-body{padding:14px;}
+    .hdr-right{gap:4px;}
+    .site-name{max-width:90px;font-size:1rem;}
+    #trackBtn{padding:7px 12px;font-size:0.78rem;}
+    .main{padding:0 10px 90px;}
+    .search-row{border-radius:14px;flex-direction:column;overflow:visible;gap:8px;background:transparent;box-shadow:none;}
+    #searchInput{border-radius:50px;padding:13px 18px;box-shadow:0 4px 24px rgba(0,0,0,0.18);}
+    .search-btn{border-radius:50px;padding:13px 22px;box-shadow:0 4px 24px rgba(0,0,0,0.18);}
+    .prog-steps{overflow-x:auto;padding-bottom:4px;}
+    .modal{max-height:95vh;}
+    .toast{white-space:normal;text-align:center;max-width:90vw;}
+  }
+  @media(max-width:360px){
+    .site-name{display:none;}
+    #trackBtn{padding:7px 10px;}
+  }
 </style>
 </head>
 <body>
@@ -190,7 +241,7 @@
   <h1 id="heroTitle">Rastreie a Sua Encomenda</h1>
   <p id="heroSub">Insira o número de rastreio para ver o estado da entrega</p>
   <div class="search-row">
-    <input type="text" id="searchInput" placeholder="Ex: PT123456789" oninput="doSearch()">
+    <input type="text" id="searchInput" placeholder="Ex: PT123456789" onkeydown="if(event.key==='Enter')doSearch()">
     <button class="search-btn" onclick="doSearch()" id="searchBtn">🔍 Pesquisar</button>
   </div>
 </div>
@@ -199,8 +250,11 @@
   <div class="settings-card" id="settingsCard">
     <div class="settings-card-title">🖊️ <span id="lblSiteMeta">Nome e Logótipo do Site</span></div>
     <div class="frow">
-      <div class="fg"><label id="lblSiteName">Nome do Site</label><input type="text" id="siteNameIn" placeholder="RastreioExpress" oninput="queueSaveConfig()"></div>
-      <div class="fg"><label id="lblLogoUrl">URL do Logótipo</label><input type="url" id="logoUrlIn" placeholder="https://..." oninput="queueSaveConfig()"></div>
+      <div class="fg"><label id="lblSiteName">Nome do Site</label><input type="text" id="siteNameIn" placeholder="RastreioExpress"></div>
+      <div class="fg"><label id="lblLogoUrl">URL do Logótipo</label><input type="url" id="logoUrlIn" placeholder="https://..."></div>
+    </div>
+    <div style="margin-top:10px;">
+      <button class="btn-p" onclick="saveConfig()" style="max-width:160px;padding:10px 18px;font-size:0.84rem;">💾 Guardar Config</button>
     </div>
   </div>
 
@@ -209,9 +263,11 @@
     <button class="btn-add" onclick="openAdd()">+ <span id="lblAddPkg">Adicionar Encomenda</span></button>
   </div>
 
-  <p class="section-label" id="lblPackages">📦 Encomendas</p>
-  <div class="pkg-grid" id="pkgGrid">
-    <div class="loading-s"><div class="spinner"></div><p id="loadingMsg">A ligar ao Firebase...</p></div>
+  <p class="section-label" id="lblPackages" style="display:none;">📦 Encomendas</p>
+  <div class="pkg-grid" id="pkgGrid"></div>
+  <div id="searchPrompt" style="text-align:center;padding:52px 20px;color:var(--gray-400);">
+    <div style="font-size:2.6rem;margin-bottom:11px;">🔍</div>
+    <p style="font-size:0.91rem;">Insira o número de rastreio acima e clique em Pesquisar.</p>
   </div>
 </div>
 
@@ -221,6 +277,14 @@
   <div class="lang-opt" data-lang="en" onclick="setLang('en')">🇬🇧 English</div>
   <div class="lang-opt" data-lang="fr" onclick="setLang('fr')">🇫🇷 Français</div>
   <div class="lang-opt" data-lang="es" onclick="setLang('es')">🇪🇸 Español</div>
+</div>
+
+<div id="detailPage">
+  <div class="detail-hdr">
+    <button class="back-btn" onclick="closeDetail()">←</button>
+    <span class="detail-hdr-title" id="detailHdrTitle">Detalhe da Encomenda</span>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -327,11 +391,11 @@ function initFB(){
     db=firebase.database();
     auth=firebase.auth();
 
-    // Timeout — if Firebase doesn't respond in 8s, show error instead of infinite spinner
+    // Timeout — if Firebase doesn't respond in 8s, show error
     fbLoadTimer=setTimeout(()=>{
       if(!fbReady){
         const grid=document.getElementById('pkgGrid');
-        grid.innerHTML=`<div class="empty-s"><div class="em">⚠️</div><p style="color:#c62828;font-weight:600;">Unable to connect to Firebase.<br><span style="font-size:0.8rem;color:#888;font-weight:400;">Check your internet connection or Firebase config.</span></p><button onclick="location.reload()" style="margin-top:14px;padding:9px 20px;background:var(--purple);color:#fff;border:none;border-radius:50px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Retry</button></div>`;
+        grid.innerHTML=`<div class="empty-s"><div class="em">⚠️</div><p style="color:#c62828;font-weight:600;">Sem ligação ao Firebase.<br><span style="font-size:0.8rem;color:#888;font-weight:400;">Verifique a sua ligação à internet.</span></p><button onclick="retrySearch()" style="margin-top:14px;padding:9px 20px;background:var(--purple);color:#fff;border:none;border-radius:50px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Tentar Novamente</button></div>`;
       }
     },8000);
 
@@ -341,12 +405,12 @@ function initFB(){
       d.title='Firebase: '+(s.val()?'Ligado':'Desligado');
     });
 
-    // Live packages — real-time for all users
+    // Live packages — real-time
     db.ref(DB_PKG).on('value',s=>{
       pkgs=s.val()||{};
       fbReady=true;
       clearTimeout(fbLoadTimer);
-      render();
+      render(); // safe — render checks isAdmin and searchSubmitted
     });
 
     // Live site config
@@ -412,18 +476,32 @@ function setAdmin(on){
   document.getElementById('logoutBtn').classList.toggle('vis',on);
   document.getElementById('settingsCard').classList.toggle('vis',on);
   document.getElementById('adminBar').classList.toggle('vis',on);
+  // Admin: hide search prompt, show grid immediately; user: show prompt if no search
+  const prompt=document.getElementById('searchPrompt');
+  const hero=document.querySelector('.hero');
   if(on){
+    prompt.style.display='none';
+    if(hero)hero.style.display='none';
     document.getElementById('siteNameIn').value=siteCfg.siteName||'';
     document.getElementById('logoUrlIn').value=siteCfg.logoUrl||'';
+    document.getElementById('lblPackages').style.display='';
+  }else{
+    if(hero)hero.style.display='';
+    if(!searchSubmitted){
+      prompt.style.display='';
+      document.getElementById('lblPackages').style.display='none';
+    }
   }
   render();
 }
 
 // ── SITE CONFIG ───────────────────────────────────
-let cfgQ=null;
-function queueSaveConfig(){clearTimeout(cfgQ);cfgQ=setTimeout(()=>{
-  db.ref(DB_CFG).set({siteName:document.getElementById('siteNameIn').value.trim(),logoUrl:document.getElementById('logoUrlIn').value.trim()});
-},600);}
+function saveConfig(){
+  db.ref(DB_CFG).set({
+    siteName:document.getElementById('siteNameIn').value.trim(),
+    logoUrl:document.getElementById('logoUrlIn').value.trim()
+  }).then(()=>toast('✅ Configuração guardada!')).catch(e=>toast('⚠️ Erro: '+e.message));
+}
 function applyCfg(){
   const{siteName,logoUrl}=siteCfg;
   if(siteName){
@@ -501,7 +579,29 @@ async function delPkg(key){
 }
 
 // ── SEARCH ────────────────────────────────────────
-function doSearch(){sq=document.getElementById('searchInput').value.trim().toLowerCase();render();}
+let searchSubmitted=false;
+function doSearch(){
+  const val=document.getElementById('searchInput').value.trim();
+  sq=val.toLowerCase();
+  if(!val){
+    // Clear result, show prompt again
+    document.getElementById('pkgGrid').innerHTML='';
+    document.getElementById('searchPrompt').style.display='';
+    document.getElementById('lblPackages').style.display='none';
+    return;
+  }
+  searchSubmitted=true;
+  document.getElementById('searchPrompt').style.display='none';
+  document.getElementById('lblPackages').style.display='';
+  if(!fbReady){
+    // Firebase not ready yet — show spinner and wait
+    document.getElementById('pkgGrid').innerHTML=`<div class="loading-s"><div class="spinner"></div><p id="loadingMsg">${t('loadingMsg')}</p></div>`;
+    // initFB may not have been called yet — ensure it's running
+    if(!db){initFB();}
+  } else {
+    render();
+  }
+}
 
 // ── COUNTDOWN ─────────────────────────────────────
 function fmtCd(p){
@@ -517,22 +617,42 @@ function fmtCd(p){
 // ── RENDER ────────────────────────────────────────
 function render(){
   const grid=document.getElementById('pkgGrid');
-  Object.values(cdIntervals).forEach(clearInterval);cdIntervals={};
-  if(!fbReady){grid.innerHTML=`<div class="loading-s"><div class="spinner"></div><p>${t('loadingMsg')}</p></div>`;return;}
-  let list=Object.entries(pkgs);
-  if(sq&&!isAdmin)list=list.filter(([,p])=>p.trackId&&p.trackId.toLowerCase().includes(sq));
   const lblEl=document.getElementById('lblPackages');
-  if(lblEl){
-    if(isAdmin)lblEl.textContent='⚡ All Orders ('+list.length+')';
-    else lblEl.textContent=t('lblPackages');
+  Object.values(cdIntervals).forEach(clearInterval);cdIntervals={};
+
+  // ADMIN VIEW — show all orders, always visible
+  if(isAdmin){
+    document.getElementById('searchPrompt').style.display='none';
+    if(lblEl){lblEl.style.display='';lblEl.textContent='⚡ All Orders ('+Object.keys(pkgs).length+')';}
+    if(!fbReady){grid.innerHTML=`<div class="loading-s"><div class="spinner"></div><p>${t('loadingMsg')}</p></div>`;return;}
+    let list=Object.entries(pkgs);
+    if(sq)list=list.filter(([,p])=>p.trackId&&p.trackId.toLowerCase().includes(sq));
+    if(list.length===0){grid.innerHTML=`<div class="empty-s"><div class="em">📭</div><p>${sq?t('emptySearch'):t('emptyMsg')}</p></div>`;return;}
+    list.sort((a,b)=>(b[1].createdAt||0)-(a[1].createdAt||0));
+    grid.innerHTML=list.map(([k,p])=>buildCard(k,p)).join('');
+    list.forEach(([k,p])=>{const el=document.getElementById('cd_'+k);if(el)cdIntervals[k]=setInterval(()=>{el.textContent=fmtCd(p);},1000);});
+    return;
   }
-  if(list.length===0){grid.innerHTML=`<div class="empty-s"><div class="em">📭</div><p>${sq?t('emptySearch'):t('emptyMsg')}</p></div>`;return;}
+
+  // USER VIEW — only show result after search submitted
+  if(!searchSubmitted){return;}
+
+  if(!fbReady){
+    // Still loading — keep spinner
+    return;
+  }
+
+  if(lblEl)lblEl.style.display='';
+  if(!sq){grid.innerHTML='';return;}
+
+  const list=Object.entries(pkgs).filter(([,p])=>p.trackId&&p.trackId.toLowerCase().includes(sq));
+  if(list.length===0){
+    grid.innerHTML=`<div class="empty-s"><div class="em">📭</div><p>${t('emptySearch')}</p><button onclick="document.getElementById('searchInput').focus()" style="margin-top:14px;padding:9px 22px;background:var(--purple);color:#fff;border:none;border-radius:50px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 ${t('searchBtn')}</button></div>`;
+    return;
+  }
   list.sort((a,b)=>(b[1].createdAt||0)-(a[1].createdAt||0));
   grid.innerHTML=list.map(([k,p])=>buildCard(k,p)).join('');
-  list.forEach(([k,p])=>{
-    const el=document.getElementById('cd_'+k);
-    if(el)cdIntervals[k]=setInterval(()=>{el.textContent=fmtCd(p);},1000);
-  });
+  list.forEach(([k,p])=>{const el=document.getElementById('cd_'+k);if(el)cdIntervals[k]=setInterval(()=>{el.textContent=fmtCd(p);},1000);});
 }
 
 function buildCard(key,p){
@@ -575,7 +695,82 @@ function buildCard(key,p){
     </div>${mbway}
   </div></div>`;
 }
-function toggleCard(k){document.getElementById('c_'+k)?.classList.toggle('open');}
+function openDetail(key){
+  const p=pkgs[key];if(!p)return;
+  const steps=p.steps||[t('o0'),t('o1'),t('o2')];
+  const cur=p.currentStep||0;
+  const bc=p.paid==='paid'?'b-paid':'b-unpaid';
+  const bt=p.paid==='paid'?t('paid'):t('unpaid');
+  const dd=p.date?new Date(p.date+'T12:00').toLocaleDateString(
+    lang==='en'?'en-GB':lang==='fr'?'fr-FR':lang==='es'?'es-ES':'pt-PT',
+    {day:'2-digit',month:'short',year:'numeric'}
+  ):'—';
+  const dots=steps.map((s,i)=>{
+    const done=i<cur,active=i===cur;
+    const line=i<steps.length-1?`<div class="step-line${i<cur?' done':''}"></div>`:'';
+    return `<div class="step-dot${done?' done':active?' active':''}">${done?'✓':i+1}</div>${line}`;
+  }).join('');
+  const lbls=steps.map((s,i)=>{
+    const done=i<cur,active=i===cur;
+    return `<div class="step-lbl${done?' done':active?' active':''}">${s}</div>`;
+  }).join('');
+  const mbway=p.paid!=='paid'?`<button class="mbway-btn" style="margin-top:4px;">📱 ${t('payMbway')}</button>`:'';
+  const adminBtns=isAdmin?`<div style="display:flex;gap:9px;margin-top:14px;"><button class="bsm bedit" onclick="openEdit('${key}')">✏️ Editar</button><button class="bsm bdel" onclick="delPkg('${key}');closeDetail()">🗑️ Remover</button></div>`:'';
+
+  document.getElementById('detailHdrTitle').textContent=p.desc||p.trackId||'—';
+  document.getElementById('detailBody').innerHTML=`
+    <div class="detail-hero">
+      <div class="detail-icon">📦</div>
+      <div>
+        <div class="detail-pkg-name">${p.desc||p.trackId||'—'}</div>
+        <div class="detail-pkg-id">#${p.trackId||'—'}</div>
+        <div style="margin-top:7px;"><span class="pkg-badge ${bc}" style="font-size:0.72rem;">${bt}</span></div>
+      </div>
+    </div>
+    <div class="detail-cd-box">
+      <div style="font-size:1.6rem;">⏱️</div>
+      <div>
+        <div class="detail-cd-lbl">${t('countdown')}</div>
+        <div class="detail-cd-val" id="detailCd">${fmtCd(p)}</div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">📍 Progresso</div>
+      <div class="pkg-prog" style="padding:0;">
+        <div class="prog-steps">${dots}</div>
+        <div class="step-lbls">${lbls}</div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">📋 Informações</div>
+      <div class="detail-grid">
+        <div class="detail-item"><label>${t('trackId')}</label><span style="font-family:monospace;">${p.trackId||'—'}</span></div>
+        <div class="detail-item"><label>${t('sender')}</label><span>${p.sender||'—'}</span></div>
+        <div class="detail-item"><label>${t('origin')}</label><span>${p.origin||'—'}</span></div>
+        <div class="detail-item"><label>${t('dest')}</label><span>${p.dest||'—'}</span></div>
+        <div class="detail-item"><label>${t('weight')}</label><span>${p.weight?p.weight+' kg':'—'}</span></div>
+        <div class="detail-item"><label>${t('delivery')}</label><span>${dd}${p.time?' '+p.time:''}</span></div>
+      </div>
+      ${mbway}${adminBtns}
+    </div>`;
+
+  // Start countdown interval
+  Object.values(cdIntervals).forEach(clearInterval);cdIntervals={};
+  cdIntervals['detail']=setInterval(()=>{
+    const el=document.getElementById('detailCd');
+    if(el)el.textContent=fmtCd(p);
+  },1000);
+
+  document.getElementById('detailPage').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeDetail(){
+  document.getElementById('detailPage').classList.remove('open');
+  document.body.style.overflow='';
+  clearInterval(cdIntervals['detail']);
+  delete cdIntervals['detail'];
+}
+function toggleCard(k){openDetail(k);}
 
 // ── LANGUAGE ──────────────────────────────────────
 function toggleLang(){document.getElementById('langMenu').classList.toggle('open');}
@@ -616,8 +811,17 @@ document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{
 let tT=null;
 function toast(msg){clearTimeout(tT);const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');tT=setTimeout(()=>el.classList.remove('show'),2800);}
 
+// ── RETRY ─────────────────────────────────────────
+function retrySearch(){
+  fbReady=false;db=null;auth=null;
+  try{firebase.app().delete();}catch(e){}
+  initFB();
+  doSearch();
+}
+
 // ── BOOT ──────────────────────────────────────────
 applyTr();
+// Init Firebase immediately so admin auth state works and conn dot shows
 initFB();
 </script>
 </body>
