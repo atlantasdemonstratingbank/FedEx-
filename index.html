@@ -77,7 +77,7 @@
 
   /* CARDS */
   .pkg-grid{display:flex;flex-direction:column;gap:13px;}
-  .pkg-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:box-shadow 0.2s,transform 0.2s;border:2px solid transparent;}
+  .pkg-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:box-shadow 0.25s,transform 0.25s,border-color 0.25s;border:2px solid transparent;will-change:transform;}
   .pkg-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
   .pkg-card.hl{border-color:var(--orange);}
   .card-head{padding:16px 18px 10px;display:flex;align-items:flex-start;gap:13px;}
@@ -387,46 +387,52 @@ const t=k=>(TR[lang]||TR.pt)[k]||k;
 // ── FIREBASE INIT ──────────────────────────────────
 function initFB(){
   try{
+    // Prevent double-init
+    try{ firebase.app(); return; }catch(e){}
     firebase.initializeApp(FB_CFG);
     db=firebase.database();
     auth=firebase.auth();
 
-    // Timeout — if Firebase doesn't respond in 8s, show error
-    fbLoadTimer=setTimeout(()=>{
-      if(!fbReady){
-        const grid=document.getElementById('pkgGrid');
-        grid.innerHTML=`<div class="empty-s"><div class="em">⚠️</div><p style="color:#c62828;font-weight:600;">Não foi possível carregar os dados.<br><span style="font-size:0.8rem;color:#888;font-weight:400;">Verifique a sua ligação à internet e tente novamente.</span></p><button onclick="retrySearch()" style="margin-top:14px;padding:9px 20px;background:var(--purple);color:#fff;border:none;border-radius:50px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Tentar Novamente</button></div>`;
-      }
-    },12000);
-
+    // Connection indicator
     db.ref('.info/connected').on('value',s=>{
       const d=document.getElementById('connDot');
       d.className='conn-dot '+(s.val()?'on':'off');
       d.title='Firebase: '+(s.val()?'Ligado':'Desligado');
     });
 
-    // Live packages — real-time
+    // Site config — load for ALL users immediately (logo, name)
+    db.ref(DB_CFG).on('value',s=>{
+      siteCfg=s.val()||{};
+      applyCfg();
+    });
+
+    // Packages — load eagerly for everyone so search is instant
     db.ref(DB_PKG).on('value',s=>{
       pkgs=s.val()||{};
       fbReady=true;
       clearTimeout(fbLoadTimer);
-      render(); // safe — render checks isAdmin and searchSubmitted
+      render();
     });
 
-    // Live site config
-    db.ref(DB_CFG).on('value',s=>{
-      if(s.val()){siteCfg=s.val();applyCfg();}
-    });
-
+    // Auth state
     auth.onAuthStateChanged(u=>{
       if(u&&u.email===ADMIN_E)setAdmin(true);
       else setAdmin(false);
     });
 
+    // Timeout — only show error if still not connected after 10s
+    fbLoadTimer=setTimeout(()=>{
+      if(!fbReady){
+        const grid=document.getElementById('pkgGrid');
+        if(searchSubmitted){
+          grid.innerHTML=`<div class="empty-s"><div class="em">⚠️</div><p style="color:#c62828;font-weight:600;">Não foi possível carregar os dados.<br><span style="font-size:0.8rem;color:#888;font-weight:400;">Verifique a sua ligação à internet.</span></p><button onclick="retrySearch()" style="margin-top:14px;padding:9px 20px;background:var(--purple);color:#fff;border:none;border-radius:50px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;font-size:0.85rem;">🔄 Tentar Novamente</button></div>`;
+        }
+      }
+    },10000);
+
   }catch(e){
     console.error(e);
     toast('⚠️ Erro Firebase: '+e.message);
-    document.getElementById('pkgGrid').innerHTML=`<div class="empty-s"><div class="em">⚠️</div><p>Erro de ligação.</p></div>`;
   }
 }
 
@@ -503,18 +509,25 @@ function saveConfig(){
   }).then(()=>toast('✅ Configuração guardada!')).catch(e=>toast('⚠️ Erro: '+e.message));
 }
 function applyCfg(){
-  const{siteName,logoUrl}=siteCfg;
+  const siteName=siteCfg.siteName||'';
+  const logoUrl=siteCfg.logoUrl||'';
+  // Apply name for everyone
   if(siteName){
     const h=Math.ceil(siteName.length/2);
     document.getElementById('siteName').innerHTML=siteName.slice(0,h)+'<span>'+siteName.slice(h)+'</span>';
     document.title=siteName;
   }
+  // Apply logo for everyone
   const w=document.getElementById('logoWrap');
-  if(logoUrl){w.innerHTML=`<img src="${logoUrl}" onerror="this.parentElement.innerHTML='📦'">`;}
-  else{w.innerHTML='📦';}
+  if(logoUrl){
+    w.innerHTML=`<img src="${logoUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:10px;" onerror="this.parentElement.innerHTML='📦'">`;
+  } else {
+    w.innerHTML='📦';
+  }
+  // Populate admin inputs if admin panel is visible
   if(isAdmin){
-    document.getElementById('siteNameIn').value=siteCfg.siteName||'';
-    document.getElementById('logoUrlIn').value=siteCfg.logoUrl||'';
+    document.getElementById('siteNameIn').value=siteName;
+    document.getElementById('logoUrlIn').value=logoUrl;
   }
 }
 
@@ -586,21 +599,20 @@ function doSearch(){
   const val=document.getElementById('searchInput').value.trim();
   sq=val.toLowerCase();
   if(!val){
-    // Clear result, show prompt again
     document.getElementById('pkgGrid').innerHTML='';
     document.getElementById('searchPrompt').style.display='';
     document.getElementById('lblPackages').style.display='none';
+    searchSubmitted=false;
     return;
   }
   searchSubmitted=true;
   document.getElementById('searchPrompt').style.display='none';
   document.getElementById('lblPackages').style.display='';
   if(!fbReady){
-    // Firebase not ready yet — show spinner and wait
-    document.getElementById('pkgGrid').innerHTML=`<div class="loading-s"><div class="spinner"></div><p id="loadingMsg">${t('loadingMsg')}</p></div>`;
-    // initFB may not have been called yet — ensure it's running
-    if(!db){initFB();}
+    // Show spinner — render() will fire automatically when Firebase responds
+    document.getElementById('pkgGrid').innerHTML=`<div class="loading-s"><div class="spinner"></div><p>${t('loadingMsg')}</p></div>`;
   } else {
+    // Data already loaded — render instantly, no reload needed
     render();
   }
 }
@@ -816,9 +828,8 @@ function toast(msg){clearTimeout(tT);const el=document.getElementById('toast');e
 // ── RETRY ─────────────────────────────────────────
 function retrySearch(){
   fbReady=false;db=null;auth=null;
-  try{firebase.app().delete();}catch(e){}
-  initFB();
-  doSearch();
+  try{firebase.app().delete().then(()=>{initFB();if(searchSubmitted)doSearch();});}
+  catch(e){initFB();if(searchSubmitted)doSearch();}
 }
 
 // ── BOOT ──────────────────────────────────────────
