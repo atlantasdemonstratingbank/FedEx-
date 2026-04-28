@@ -931,7 +931,7 @@
           <input type="tel" id="mbway-number" placeholder="+351 9XX XXX XXX" maxlength="20">
         </div>
 
-        <div style="background:rgba(255,171,0,0.08);border:1px solid rgba(255,171,0,0.2);border-radius:8px;padding:12px 16px;font-size:0.8rem;color:var(--warning);">
+        <div id="mbway-warning-msg" style="background:rgba(255,171,0,0.08);border:1px solid rgba(255,171,0,0.2);border-radius:8px;padding:12px 16px;font-size:0.8rem;color:var(--warning);">
           ⚠️ Após a submissão, receberás uma confirmação e instruções de pagamento. O pedido MB WAY será enviado manualmente pela nossa equipa.
         </div>
       </div>
@@ -1038,6 +1038,13 @@
   </div>
 </div>
 
+<!-- MAINTENANCE OVERLAY -->
+<div id="maintenance-overlay" style="display:none;position:fixed;inset:0;background:rgba(10,10,15,0.97);z-index:9999;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px;">
+  <div style="font-size:4rem;margin-bottom:24px;">🔧</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:4px;margin-bottom:12px;">EM MANUTENÇÃO</div>
+  <div style="color:#888899;font-size:1rem;max-width:400px;line-height:1.7;">O serviço está temporariamente indisponível. Voltamos em breve.</div>
+</div>
+
 <!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
 
@@ -1063,37 +1070,108 @@ const DEL = {
 };
 
 let app, db;
+let dbReady = false;
 
 function initFirebase() {
-  if (!firebase.apps.length) app = firebase.initializeApp(FIREBASE_CONFIG);
-  else app = firebase.apps[0];
-  db = firebase.database();
-  loadConfig();
+  try {
+    if (!firebase.apps.length) app = firebase.initializeApp(FIREBASE_CONFIG);
+    else app = firebase.apps[0];
+    db = firebase.database();
+    dbReady = true;
+    loadConfig();
+  } catch(e) {
+    console.error('Firebase init error:', e);
+  }
+}
+
+function checkDb() {
+  if (!dbReady || !db) {
+    toast('Serviço temporariamente indisponível. Recarrega a página.', 'error');
+    return false;
+  }
+  return true;
 }
 
 // ── CONFIG (from dev portal) ──────────────────────────────────────────────
 function loadConfig() {
   db.ref(DEL.config).on('value', snap => {
     const cfg = snap.val() || {};
+
+    // Branding
     if (cfg.brandName) {
       document.getElementById('brand-name').textContent = cfg.brandName;
       document.getElementById('footer-brand').textContent = cfg.brandName;
       document.getElementById('page-title').textContent = cfg.brandName + ' — Entregas Rápidas';
     }
-    if (cfg.primaryColor) {
-      document.documentElement.style.setProperty('--primary', cfg.primaryColor);
-    }
-    if (cfg.accentColor) {
-      document.documentElement.style.setProperty('--accent', cfg.accentColor);
-    }
-    if (cfg.heroTitle) document.getElementById('hero-title').innerHTML = cfg.heroTitle;
-    if (cfg.heroSub) document.getElementById('hero-sub').textContent = cfg.heroSub;
+    if (cfg.primaryColor) document.documentElement.style.setProperty('--primary', cfg.primaryColor);
+    if (cfg.accentColor)  document.documentElement.style.setProperty('--accent', cfg.accentColor);
+    if (cfg.heroTitle)    document.getElementById('hero-title').innerHTML = cfg.heroTitle;
+    if (cfg.heroSub)      document.getElementById('hero-sub').textContent = cfg.heroSub;
     if (cfg.footerTagline) document.getElementById('footer-tagline').textContent = cfg.footerTagline;
     if (cfg.logoUrl) {
       const el = document.getElementById('brand-name');
       el.innerHTML = `<img src="${cfg.logoUrl}" alt="logo" style="height:36px;object-fit:contain;">`;
     }
+
+    // MB WAY message from dev portal
+    if (cfg.mbwayMsg) {
+      const mbwayWarning = document.getElementById('mbway-warning-msg');
+      if (mbwayWarning) mbwayWarning.textContent = '⚠️ ' + cfg.mbwayMsg;
+    }
+
+    // Fees from dev portal — override hardcoded values
+    if (cfg.fees) {
+      if (cfg.fees.document) FEES.document = cfg.fees.document;
+      if (cfg.fees.small)    FEES.small    = cfg.fees.small;
+      if (cfg.fees.medium)   FEES.medium   = cfg.fees.medium;
+      if (cfg.fees.large)    FEES.large    = cfg.fees.large;
+      if (cfg.fees.fragile)  FEES.fragile  = cfg.fees.fragile;
+      // Refresh fee display if a package type is already selected
+      const pkgType = document.getElementById('pkg-type')?.value;
+      if (pkgType && FEES[pkgType]) {
+        document.getElementById('fee-display').textContent = FEES[pkgType] + ' €';
+      }
+    }
+
+    // Feature flags from dev portal
+    const feats = cfg.features || {};
+
+    // Maintenance mode — show overlay if enabled
+    if (feats.maintenance === true) {
+      showMaintenance();
+    } else {
+      hideMaintenance();
+    }
+
+    // Submissions toggle — disable/hide submit button
+    const submitBtn = document.getElementById('submit-btn');
+    if (submitBtn) {
+      if (feats.submissions === false) {
+        submitBtn.disabled = true;
+        submitBtn.title = 'Submissões temporariamente desativadas.';
+        document.getElementById('submit-label').textContent = 'Submissões desativadas';
+      } else {
+        submitBtn.disabled = false;
+        document.getElementById('submit-label').textContent = 'Submeter Encomenda →';
+      }
+    }
+
+    // Tracking toggle — hide/show tracking section
+    const trackingSection = document.getElementById('tracking');
+    if (trackingSection) {
+      trackingSection.style.display = feats.tracking === false ? 'none' : '';
+    }
   });
+}
+
+// ── MAINTENANCE ───────────────────────────────────────────────────────────
+function showMaintenance() {
+  const el = document.getElementById('maintenance-overlay');
+  if (el) el.style.display = 'flex';
+}
+function hideMaintenance() {
+  const el = document.getElementById('maintenance-overlay');
+  if (el) el.style.display = 'none';
 }
 
 // ── FEES ──────────────────────────────────────────────────────────────────
@@ -1122,6 +1200,7 @@ function generateCode() {
 let currentCode = '';
 
 async function submitOrder() {
+  if (!checkDb()) return;
   const senderName    = document.getElementById('sender-name').value.trim();
   const senderPhone   = document.getElementById('sender-phone').value.trim();
   const senderAddress = document.getElementById('sender-address').value.trim();
@@ -1137,7 +1216,8 @@ async function submitOrder() {
   if (!pkgType) return toast('Seleciona o tipo de pacote.', 'error');
   if (!pkgDesc) return toast('Descreve o conteúdo do pacote.', 'error');
   if (!mbway) return toast('Insere o teu número MB WAY.', 'error');
-  if (!/^(\+351\s?)?9\d{8}$/.test(mbway.replace(/\s/g,''))) return toast('Número MB WAY inválido. Formato: +351 9XXXXXXXX', 'error');
+  const mbwayClean = mbway.replace(/[\s\-]/g, '');
+  if (mbwayClean.length < 9) return toast('Número MB WAY inválido. Insere um número válido.', 'error');
 
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
@@ -1204,6 +1284,7 @@ function closeModal() {
 let countdownInterval = null;
 
 async function trackPackage() {
+  if (!checkDb()) return;
   const raw = document.getElementById('track-input').value.trim().toUpperCase();
   if (!raw) return toast('Insere um código de rastreio.', 'error');
 
